@@ -1,0 +1,26 @@
+<!--
+  ~ Copyright (C)  2020 Kynetics, LLC
+  ~ SPDX-License-Identifier: Apache-2.0
+  -->
+
+<resources>
+    <string name="app_name">TTY Test</string>
+    <string name="app_title">Kynetics Serial Test Application</string>
+    <string name="tab_text_1">Receiver</string>
+    <string name="tab_text_2">Sender</string>
+    <string name="data_acquisition">data acquisition</string>
+    <string name="start">start</string>
+    <string name="stop">stop</string>
+    <string name="data">data</string>
+    <string name="baud_rate">baud rate</string>
+    <string name="port_configuration">port configuration</string>
+    <string name="select_baud_rate">select baud rate</string>
+    <string name="no_tty_devices_found">no tty devices found</string>
+    <string name="serial_setup">serial setup</string>
+    <string name="select_tty_device">select tty device</string>
+    <string name="baud_9600">9600</string>
+    <string name="baud_38400">38400</string>
+    <string name="baud_115200">115200</string>
+    <string name="write_data_to_serial_port">write data to serial port</string>
+    <string name="insert_data">Insert data:</string>
+</resources>

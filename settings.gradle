@@ -1,0 +1,2 @@
+include ':app', ':jSerialComm-2.5.3'
+rootProject.name='android-serial-tty-example'
