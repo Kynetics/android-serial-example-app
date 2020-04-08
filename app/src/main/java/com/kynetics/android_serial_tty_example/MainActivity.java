@@ -38,6 +38,14 @@ public class MainActivity extends AppCompatActivity {
         List<String> devices = new ArrayList<>();
 
         File dir = new File("/sys/class/tty");
+
+        /* Check dir permissions */
+        if (!dir.canRead())
+        {
+            Log.e(TAG, "Permissions insufficient on this device");
+            return devices;
+        }
+
         File[] files = dir.listFiles();
 
         for (int i = 0; i < files.length; ++i) {
