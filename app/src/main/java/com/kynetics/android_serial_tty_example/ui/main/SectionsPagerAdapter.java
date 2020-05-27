@@ -26,12 +26,15 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
     private final Context mContext;
     private String devName;
     private int baudRate;
+    private boolean rs485Mode;
 
-    public SectionsPagerAdapter(Context context, FragmentManager fm, String devName, int baudRate) {
+    public SectionsPagerAdapter(Context context, FragmentManager fm, String devName, int baudRate,
+                                boolean rs485Mode) {
         super(fm);
         mContext = context;
         this.devName = devName;
         this.baudRate = baudRate;
+        this.rs485Mode = rs485Mode;
     }
 
     @Override
@@ -41,10 +44,10 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
         {
             /* Receiver tab */
             case 0:
-                return ReceiverFragment.newInstance(this.devName, this.baudRate);
+                return ReceiverFragment.newInstance(this.devName, this.baudRate, this.rs485Mode);
             /* Sender tab */
             case 1:
-                return SenderFragment.newInstance(this.devName, this.baudRate);
+                return SenderFragment.newInstance(this.devName, this.baudRate, this.rs485Mode);
             default:
                 return null;
         }

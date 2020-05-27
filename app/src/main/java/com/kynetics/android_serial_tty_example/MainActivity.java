@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
@@ -73,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
         final RadioGroup baudGroup = dialogView.findViewById(R.id.radioGroup_baudRate);
         final RadioButton defaultBaudBtn = dialogView.findViewById(baudGroup.getCheckedRadioButtonId());
         selectedBaudRate = defaultBaudBtn.getText().toString();
+        final CheckBox checkBoxRS485 = dialogView.findViewById(R.id.checkBox_RS485);
 
         /* Setup list of serial interfaces */
         final Spinner dropdown = dialogView.findViewById(R.id.spinner_ttyDevs);
@@ -155,7 +157,8 @@ public class MainActivity extends AppCompatActivity {
                                     getApplicationContext(),
                                     getSupportFragmentManager(),
                                     devName,
-                                    Integer.valueOf(selectedBaudRate)
+                                    Integer.valueOf(selectedBaudRate),
+                                    checkBoxRS485.isChecked()
                             );
                             ViewPager viewPager = findViewById(R.id.view_pager);
                             viewPager.setAdapter(sectionsPagerAdapter);

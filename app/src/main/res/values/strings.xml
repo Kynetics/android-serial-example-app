@@ -23,4 +23,6 @@
     <string name="baud_115200">115200</string>
     <string name="write_data_to_serial_port">write data to serial port</string>
     <string name="insert_data">Insert data:</string>
+    <string name="mode">mode</string>
+    <string name="rs_485">RS-485</string>
 </resources>

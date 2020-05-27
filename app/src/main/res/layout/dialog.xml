@@ -86,4 +86,23 @@
             android:text="@string/baud_115200" />
     </RadioGroup>
 
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+
+        <TextView
+            android:id="@+id/textView_configRS485"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="5dp"
+            android:text="@string/mode"
+            android:textAllCaps="true"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+
+        <CheckBox
+            android:id="@+id/checkBox_RS485"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/rs_485"
+            android:textAllCaps="true" />
 </LinearLayout>

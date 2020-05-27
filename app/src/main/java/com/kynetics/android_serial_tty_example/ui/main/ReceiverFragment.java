@@ -31,6 +31,7 @@ import com.kynetics.android_serial_tty_example.R;
 public class ReceiverFragment extends Fragment {
     private static final String ARG_TTY_DEVNAME = "tty_devname";
     private static final String ARG_TTY_BAUDRATE = "tty_baudrate";
+    private static final String ARG_TTY_RS485MODE = "tty_rs485mode";
     private static String TAG = "KyneticsTTYExampleApplication:ReceiverFragment";
     private static SerialPort comPort;
     private ToggleButton acquisitionToggleButton;
@@ -39,16 +40,18 @@ public class ReceiverFragment extends Fragment {
     private TextView devBaudTextView;
     private TextView devParityBitsTextView;
     private TextView devDataBitsTextView;
+    private TextView devRS485ModeTextView;
     private TextView rcvDataTextView;
 
     public ReceiverFragment() {
     }
 
-    public static ReceiverFragment newInstance(String devName, int baudRate) {
+    public static ReceiverFragment newInstance(String devName, int baudRate, boolean rs485Mode) {
         ReceiverFragment fragment = new ReceiverFragment();
         Bundle bundle = new Bundle();
         bundle.putString(ARG_TTY_DEVNAME, devName);
         bundle.putInt(ARG_TTY_BAUDRATE, baudRate);
+        bundle.putBoolean(ARG_TTY_RS485MODE, rs485Mode);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -58,12 +61,18 @@ public class ReceiverFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "Open device: " + getArguments().getString(ARG_TTY_DEVNAME));
         Log.d(TAG, "Set baudrate to: " + getArguments().getInt(ARG_TTY_BAUDRATE));
+        Log.d(TAG, "RS485 mode: " + (getArguments().getBoolean(ARG_TTY_RS485MODE) ?
+                "enabled" : "disabled"));
 
         /* Open serial port */
         comPort = SerialPort.getCommPort(getArguments().getString(ARG_TTY_DEVNAME));
 
         /* Configure serial port - blocking mode, infinite timeout */
-        comPort.setBaudRate(getArguments().getInt(ARG_TTY_BAUDRATE));
+        comPort.setComPortParameters(getArguments().getInt(ARG_TTY_BAUDRATE),
+                comPort.getNumDataBits(),
+                comPort.getNumStopBits(),
+                comPort.getParity(),
+                getArguments().getBoolean(ARG_TTY_RS485MODE));
         comPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING | SerialPort.TIMEOUT_WRITE_BLOCKING,
                 0, 0);
 
@@ -82,6 +91,7 @@ public class ReceiverFragment extends Fragment {
         devBaudTextView = root.findViewById(R.id.textView_configDevBaud);
         devParityBitsTextView = root.findViewById(R.id.textView_configDevParity);
         devDataBitsTextView = root.findViewById(R.id.textView_configDevDataBits);
+        devRS485ModeTextView = root.findViewById(R.id.textView_configRS485);
         acquisitionToggleButton = root.findViewById(R.id.toggleButton_acquisition);
         acquisitionProgressBar = root.findViewById(R.id.progressBar_acquisition);
         rcvDataTextView = root.findViewById(R.id.textView_messages);
@@ -123,6 +133,11 @@ public class ReceiverFragment extends Fragment {
         }
 
         devDataBitsTextView.setText(comPort.getNumDataBits() + " bits");
+
+        if (getArguments().getBoolean(ARG_TTY_RS485MODE))
+            devRS485ModeTextView.setText("RS-485");
+        else
+            devRS485ModeTextView.setVisibility(View.GONE);
 
         /* Setup data acquisition button */
         acquisitionToggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {

@@ -26,17 +26,19 @@ import com.kynetics.android_serial_tty_example.R;
 public class SenderFragment extends Fragment {
     private static final String ARG_TTY_DEVNAME = "tty_devname";
     private static final String ARG_TTY_BAUDRATE = "tty_baudrate";
+    private static final String ARG_TTY_RS485MODE = "tty_rs485mode";
     private static String TAG = "KyneticsTTYExampleApplication:SenderFragment";
     private static SerialPort comPort;
     private FloatingActionButton sendFab;
     private EditText sendTxt;
 
 
-    public static SenderFragment newInstance(String devName, int baudRate) {
+    public static SenderFragment newInstance(String devName, int baudRate, boolean rs485Mode) {
         SenderFragment fragment = new SenderFragment();
         Bundle bundle = new Bundle();
         bundle.putString(ARG_TTY_DEVNAME, devName);
         bundle.putInt(ARG_TTY_BAUDRATE, baudRate);
+        bundle.putBoolean(ARG_TTY_RS485MODE, rs485Mode);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -46,12 +48,18 @@ public class SenderFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "Open device: " + getArguments().getString(ARG_TTY_DEVNAME));
         Log.d(TAG, "Set baudrate to: " + getArguments().getInt(ARG_TTY_BAUDRATE));
+        Log.d(TAG, "RS485 mode: " + (getArguments().getBoolean(ARG_TTY_RS485MODE) ?
+                "enabled" : "disabled"));
 
         /* Open serial port */
         comPort = SerialPort.getCommPort(getArguments().getString(ARG_TTY_DEVNAME));
 
         /* Configure serial port - blocking mode, infinite timeout */
-        comPort.setBaudRate(getArguments().getInt(ARG_TTY_BAUDRATE));
+        comPort.setComPortParameters(getArguments().getInt(ARG_TTY_BAUDRATE),
+                comPort.getNumDataBits(),
+                comPort.getNumStopBits(),
+                comPort.getParity(),
+                getArguments().getBoolean(ARG_TTY_RS485MODE));
         comPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING | SerialPort.TIMEOUT_WRITE_BLOCKING,
                 0, 0);
 
