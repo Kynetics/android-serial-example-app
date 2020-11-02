@@ -28,7 +28,6 @@
             android:paddingBottom="5dp"
             android:text="@string/serial_setup"
             android:textAlignment="center"
-            android:textAllCaps="true"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
         <View
@@ -47,7 +46,6 @@
             android:layout_height="wrap_content"
             android:paddingBottom="5dp"
             android:text="@string/select_tty_device"
-            android:textAllCaps="true"
             android:textAppearance="@style/TextAppearance.AppCompat.Small" />
 
         <Spinner
@@ -61,7 +59,6 @@
             android:layout_height="wrap_content"
             android:paddingBottom="5dp"
             android:text="@string/select_baud_rate"
-            android:textAllCaps="true"
             android:textAppearance="@style/TextAppearance.AppCompat.Small" />
 
         <RadioGroup
@@ -104,14 +101,12 @@
             android:layout_height="wrap_content"
             android:paddingBottom="5dp"
             android:text="@string/mode"
-            android:textAllCaps="true"
             android:textAppearance="@style/TextAppearance.AppCompat.Small" />
 
         <CheckBox
             android:id="@+id/checkBox_RS485"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/rs_485"
-            android:textAllCaps="true" />
+            android:text="@string/rs_485" />
     </LinearLayout>
 </ScrollView>

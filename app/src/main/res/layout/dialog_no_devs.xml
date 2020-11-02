@@ -18,7 +18,6 @@
         android:layout_height="wrap_content"
         android:paddingBottom="5dp"
         android:text="@string/no_tty_devices_found"
-        android:textAllCaps="true"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:textColor="#ff8364" />
 

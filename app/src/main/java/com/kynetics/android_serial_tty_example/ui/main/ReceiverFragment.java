@@ -111,8 +111,8 @@ public class ReceiverFragment extends Fragment {
         }
 
         /* Display port information */
-        devNameTextView.setText(comPort.getSystemPortName());
-        devBaudTextView.setText(String.valueOf(comPort.getBaudRate()) + " bps");
+        devNameTextView.setText(comPort.getSystemPortName().toUpperCase());
+        devBaudTextView.setText((String.valueOf(comPort.getBaudRate()) + " BPS").toUpperCase());
 
         switch (comPort.getParity()) {
             case SerialPort.NO_PARITY:
@@ -132,7 +132,7 @@ public class ReceiverFragment extends Fragment {
                 break;
         }
 
-        devDataBitsTextView.setText(comPort.getNumDataBits() + " bits");
+        devDataBitsTextView.setText((comPort.getNumDataBits() + " bits").toUpperCase());
 
         if (getArguments().getBoolean(ARG_TTY_RS485MODE))
             devRS485ModeTextView.setText("RS-485");
