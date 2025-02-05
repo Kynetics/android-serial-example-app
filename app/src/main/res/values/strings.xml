@@ -25,4 +25,5 @@
     <string name="insert_data">Insert data:</string>
     <string name="mode">MODE</string>
     <string name="rs_485">RS-485</string>
+    <string name="menu_restart">restart</string>
 </resources>
