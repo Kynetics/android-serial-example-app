@@ -11,7 +11,7 @@
     android:fitsSystemWindows="true"
     android:orientation="vertical"
     android:paddingBottom="5dp"
-    tools:context=".ui.AboutActivity">
+    tools:context=".AboutActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"

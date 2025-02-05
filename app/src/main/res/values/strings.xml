@@ -8,13 +8,14 @@
     <string name="app_title">Kynetics Serial Handler Application</string>
     <string name="tab_text_1">Receiver</string>
     <string name="tab_text_2">Sender</string>
-    <string name="data_acquisition">DATA ACQUISITION</string>
+    <string name="data_acquisition">data acquisition</string>
     <string name="start">START</string>
     <string name="stop">STOP</string>
     <string name="data">DATA</string>
     <string name="baud_rate">BAUD RATe</string>
     <string name="port_configuration">PORT CONFIGURATION</string>
     <string name="select_baud_rate">SELECT BAUD RATE</string>
+    <string name="selected_device">Selected device:</string>
     <string name="no_tty_devices_found">NO TTY DEVICES FOUND</string>
     <string name="serial_setup">SERIAL SETUP</string>
     <string name="select_tty_device">SELECT TTY DEVICE</string>
@@ -25,6 +26,8 @@
     <string name="insert_data">Insert data:</string>
     <string name="mode">MODE</string>
     <string name="rs_485">RS-485</string>
+    <string name="send_btn">Send Data</string>
+
     <string name="menu_restart">restart</string>
     <string name="menu_about">About</string>
     <string name="about_text">Serial Android SDK extension example application \n\n

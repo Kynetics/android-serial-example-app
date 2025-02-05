@@ -13,7 +13,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -21,13 +20,12 @@ import android.widget.Spinner;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.viewpager.widget.ViewPager;
 
+import com.fazecast.jSerialComm.SerialPort;
+import com.fazecast.jSerialComm.SerialPortDataListener;
+import com.fazecast.jSerialComm.SerialPortEvent;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.android.material.tabs.TabLayout;
-import com.kynetics.android_serial_tty_example.ui.AboutActivity;
-import com.kynetics.android_serial_tty_example.ui.main.SectionsPagerAdapter;
+import com.kynetics.android_serial_tty_example.databinding.ActivityMainBinding;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -36,35 +34,12 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private static String TAG = "KyneticsTTYExampleApplication:MainActivity";
-    private static String selectedBaudRate;
+    private ActivityMainBinding binding;
 
-    private static List<String> findImxTTYDevices() {
-        /* Find all IMX serial devices */
-        List<String> devices = new ArrayList<>();
-
-        File dir = new File("/sys/class/tty");
-
-        /* Check dir permissions */
-        if (!dir.canRead())
-        {
-            Log.e(TAG, "Permissions insufficient on this device");
-            return devices;
-        }
-
-        File[] files = dir.listFiles();
-
-        for (int i = 0; i < files.length; ++i) {
-            File file = files[i];
-            String fileName = file.getName();
-            /* IMX serial devices are mapped as ttymxc/LP* in Android system */
-            if (fileName.startsWith("ttymxc") || fileName.startsWith("ttyLP")) {
-                Log.d(TAG, "Found imx serial dev: " + fileName);
-                devices.add(fileName);
-            }
-        }
-
-        return devices;
-    }
+    private SerialPort comPort;
+    private String devName;
+    private int selectedBaudRate;
+    private Boolean isRS485Mode;
 
     @Override
     protected void onStart() {
@@ -75,10 +50,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        setSupportActionBar(binding.toolbar);
 
     }
 
@@ -89,8 +63,6 @@ public class MainActivity extends AppCompatActivity {
         View dialogView = inflater.inflate(R.layout.dialog, null);
 
         final RadioGroup baudGroup = dialogView.findViewById(R.id.radioGroup_baudRate);
-        final RadioButton defaultBaudBtn = dialogView.findViewById(baudGroup.getCheckedRadioButtonId());
-        selectedBaudRate = defaultBaudBtn.getText().toString();
         final CheckBox checkBoxRS485 = dialogView.findViewById(R.id.checkBox_RS485);
 
         /* Setup list of serial interfaces */
@@ -114,11 +86,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             /* Setup baud rate listener */
             final View finalDialogView = dialogView;
-            baudGroup.setOnCheckedChangeListener((group, checkedId) -> {
-                RadioButton rb = finalDialogView.findViewById(baudGroup.getCheckedRadioButtonId());
-                selectedBaudRate = rb.getText().toString();
-                Log.d(TAG, "Baud rate selected: " + selectedBaudRate);
-            });
 
             /* Setup dropdown menu */
             ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, ttyDevices);
@@ -129,7 +96,11 @@ public class MainActivity extends AppCompatActivity {
                     .setView(dialogView)
                     .setCancelable(false)
                     .setPositiveButton("OK", (dialogInterface, i) -> {
-                        // Do nothing here - override later
+                        String device = dropdown.getSelectedItem().toString();
+                        RadioButton checkedBaudRate = finalDialogView.findViewById(baudGroup.getCheckedRadioButtonId());
+                        String baudRate = checkedBaudRate.getText().toString();
+                        setupSerialPort(device, baudRate, checkBoxRS485.isChecked());
+                        dialogInterface.dismiss();
                     })
                     .setNegativeButton("Close", (dialogInterface, i) -> {
                         finish();
@@ -139,42 +110,189 @@ public class MainActivity extends AppCompatActivity {
                     });
 
             final AlertDialog dialog = dialogBuilder.create();
-            dialog.setOnShowListener(dialogInterface -> {
-                Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-
-                positiveButton.setOnClickListener(view -> {
-                    String devName = dropdown.getSelectedItem().toString();
-                    Log.d(TAG, devName + " selected");
-
-                    /* Check file permissions */
-                    File f = new File("/dev/" + devName);
-                    if (!f.canWrite() && !f.canRead()) {
-                        Log.e(TAG, "Permissions insufficient on this device");
-                        Snackbar.make(finalDialogView, "Insufficient permissions on " + devName + " device.",
-                                        Snackbar.LENGTH_LONG)
-                                .show();
-                        return;
-                    }
-
-                    /* Device permissions ok */
-                    SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(
-                            getApplicationContext(),
-                            getSupportFragmentManager(),
-                            devName,
-                            Integer.valueOf(selectedBaudRate),
-                            checkBoxRS485.isChecked()
-                    );
-                    ViewPager viewPager = findViewById(R.id.view_pager);
-                    viewPager.setAdapter(sectionsPagerAdapter);
-                    TabLayout tabs = findViewById(R.id.tabs);
-                    tabs.setupWithViewPager(viewPager);
-
-                    dialog.dismiss();
-                });
-            });
             dialog.show();
 
         }
+    }
+
+    private void setupSerialPort(String device, String baudRate, Boolean rs485Mode) {
+        devName = device;
+        Log.d(TAG, devName + " selected");
+
+        /* Check file permissions */
+        File f = new File("/dev/" + devName);
+        if (!f.canWrite() && !f.canRead()) {
+            Log.e(TAG, "Permissions insufficient on this device");
+            Snackbar.make(binding.toolbar, "Insufficient permissions on " + devName + " device.",
+                            Snackbar.LENGTH_LONG)
+                    .show();
+            return;
+        }
+
+        selectedBaudRate = Integer.valueOf(baudRate);
+        isRS485Mode = rs485Mode;
+
+        /* Open serial port */
+        comPort = SerialPort.getCommPort(devName);
+
+
+        /* Configure serial port - blocking mode, infinite timeout */
+        comPort.setComPortParameters(selectedBaudRate,
+                comPort.getNumDataBits(),
+                comPort.getNumStopBits(),
+                comPort.getParity(),
+                isRS485Mode);
+        comPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING | SerialPort.TIMEOUT_WRITE_BLOCKING,
+                0, 0);
+
+        /* Open serial port */
+        comPort.openPort();
+
+
+        /* Check if com port has been initialized */
+        if (comPort == null) {
+            Log.e(TAG, "No serial port found");
+            Snackbar.make(binding.toolbar, "No serial port found", Snackbar.LENGTH_LONG)
+                    .show();
+        }
+
+        /* Check if port is open */
+        if (!comPort.isOpen()) {
+            Snackbar.make(binding.toolbar, "Error opening serial port", Snackbar.LENGTH_LONG)
+                    .show();
+        }
+
+        setupViews();
+    }
+
+    private void setupViews() {
+        setupConfigurationsViews();
+        setupSendDataViews();
+        setupReceiveDataViews();
+    }
+
+    private void setupConfigurationsViews() {
+        binding.serialInterfaceSelected.setText(devName);
+
+        /* Display port information */
+        String parity = "";
+        switch (comPort.getParity()) {
+            case SerialPort.NO_PARITY:
+                parity = "NO PARITY";
+                break;
+            case SerialPort.EVEN_PARITY:
+                parity = "EVEN PARITY";
+                break;
+            case SerialPort.ODD_PARITY:
+                parity = "ODD PARITY";
+                break;
+            case SerialPort.MARK_PARITY:
+                parity = "MARK PARITY";
+                break;
+            case SerialPort.SPACE_PARITY:
+                parity = "SPACE PARITY";
+                break;
+        }
+
+        String configurations = "Baud rate: " + comPort.getBaudRate() + "BPS \n" +
+                "Parity: " + parity + "\n" +
+                "Data Bits: " + comPort.getNumDataBits() + " bits\n" +
+                "RS485 mode: " + (isRS485Mode ? "Enabled" : "Disabled");
+        binding.textViewConfigurations.setText(configurations);
+    }
+
+    private void setupSendDataViews() {
+        binding.btnSend.setOnClickListener(v -> {
+            String data = binding.editTextFrameData.getText().toString();
+            if (data.isEmpty()) {
+                Snackbar.make(binding.toolbar, "No data to send", Snackbar.LENGTH_LONG)
+                        .show();
+                return;
+            }
+
+            byte[] dataBytes = data.getBytes();
+            int bytesWritten = comPort.writeBytes(dataBytes, data.length());
+            if (bytesWritten == -1) {
+                Snackbar.make(binding.toolbar, "Error sending data", Snackbar.LENGTH_LONG)
+                        .show();
+            } else {
+                Snackbar.make(binding.toolbar, bytesWritten + " bytes sent.", Snackbar.LENGTH_SHORT)
+                        .show();
+            }
+        });
+
+
+    }
+
+    private void setupReceiveDataViews() {
+        binding.switchDataAcquisition.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                if (comPort == null || !comPort.isOpen()) {
+                    Snackbar.make(binding.toolbar, "Port is not open yet!", Snackbar.LENGTH_LONG)
+                            .show();
+                    binding.switchDataAcquisition.setChecked(false);
+                    return;
+                }
+
+                binding.textViewSerialMessages.setText("");
+                binding.textViewSerialMessages.setVisibility(View.VISIBLE);
+                binding.progressBarAcquisition.setVisibility(View.VISIBLE);
+
+                /* Setup serial data listener */
+                comPort.addDataListener(new SerialPortDataListener() {
+                    @Override
+                    public int getListeningEvents() {
+                        return SerialPort.LISTENING_EVENT_DATA_AVAILABLE;
+                    }
+
+                    @Override
+                    public void serialEvent(SerialPortEvent event) {
+                        if (event.getEventType() != SerialPort.LISTENING_EVENT_DATA_AVAILABLE)
+                            return;
+                        byte[] newData = new byte[comPort.bytesAvailable()];
+                        int numRead = comPort.readBytes(newData, newData.length);
+                        Log.d(TAG, "Read " + numRead + " bytes.");
+
+                        /* Display received data */
+                        String oldData = binding.textViewSerialMessages.getText().toString();
+                        String newString = new String(newData) + oldData;
+                        binding.textViewSerialMessages.setText(newString);
+                    }
+                });
+
+            } else {
+                binding.textViewSerialMessages.setVisibility(View.GONE);
+                binding.progressBarAcquisition.setVisibility(View.GONE);
+                comPort.removeDataListener();
+            }
+        });
+    }
+
+    private static List<String> findImxTTYDevices() {
+        /* Find all IMX serial devices */
+        List<String> devices = new ArrayList<>();
+
+        File dir = new File("/sys/class/tty");
+
+        /* Check dir permissions */
+        if (!dir.canRead()) {
+            Log.e(TAG, "Permissions insufficient on this device");
+            return devices;
+        }
+
+        File[] files = dir.listFiles();
+
+        for (int i = 0; i < files.length; ++i) {
+            File file = files[i];
+            String fileName = file.getName();
+            /* IMX serial devices are mapped as ttymxc/LP* in Android system */
+            if (fileName.startsWith("ttymxc") || fileName.startsWith("ttyLP")) {
+                Log.d(TAG, "Found imx serial dev: " + fileName);
+                devices.add(fileName);
+            }
+        }
+
+        return devices;
     }
 
     private void startAboutActivity() {
@@ -198,5 +316,23 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (comPort != null) {
+            comPort.removeDataListener();
+            binding.switchDataAcquisition.setChecked(false);
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        /* Close serial port */
+        if (comPort != null && comPort.isOpen()) {
+            comPort.closePort();
+        }
     }
 }

@@ -2,7 +2,7 @@
  * Copyright (C)  2025 Kynetics, Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
-package com.kynetics.android_serial_tty_example.ui;
+package com.kynetics.android_serial_tty_example;
 
 import android.os.Bundle;
 import android.text.method.LinkMovementMethod;
@@ -10,9 +10,6 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-
-import com.kynetics.android_serial_tty_example.BuildConfig;
-import com.kynetics.android_serial_tty_example.R;
 
 public class AboutActivity extends AppCompatActivity {
 
