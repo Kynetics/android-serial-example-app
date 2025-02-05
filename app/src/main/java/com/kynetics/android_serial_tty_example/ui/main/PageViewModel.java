@@ -1,3 +1,7 @@
+/*
+ * Copyright (C)  2025 Kynetics, Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package com.kynetics.android_serial_tty_example.ui.main;
 
 import androidx.arch.core.util.Function;
