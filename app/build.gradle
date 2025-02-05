@@ -1,12 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.1"
+    namespace 'com.kynetics.android_serial_tty_example'
+    compileSdk 35
     defaultConfig {
         applicationId "com.kynetics.android_serial_tty_example"
-        minSdkVersion 19
-        targetSdkVersion 29
+        minSdkVersion 24
+        //noinspection ExpiredTargetSdkVersion
+        targetSdkVersion 35
         versionCode 4
         versionName "1.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -20,7 +21,7 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.aar'])
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.google.android.material:material:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
@@ -28,5 +29,4 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    implementation project(path: ':jSerialComm-2.5.3')
 }
