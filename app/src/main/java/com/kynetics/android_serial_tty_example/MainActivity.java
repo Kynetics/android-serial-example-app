@@ -5,7 +5,7 @@
 
 package com.kynetics.android_serial_tty_example;
 
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,6 +26,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
+import com.kynetics.android_serial_tty_example.ui.AboutActivity;
 import com.kynetics.android_serial_tty_example.ui.main.SectionsPagerAdapter;
 
 import java.io.File;
@@ -66,12 +67,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        setupPortSelectDialog();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+    }
+
+    private void setupPortSelectDialog() {
 
         /* Setup UI elements */
         LayoutInflater inflater = this.getLayoutInflater();
@@ -94,32 +105,19 @@ public class MainActivity extends AppCompatActivity {
             new AlertDialog.Builder(this)
                     .setView(dialogView)
                     .setNegativeButton("Close",
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    finish();
-                                }
-                            })
+                            (dialogInterface, i) -> finish())
+                    .setNeutralButton(R.string.menu_about,
+                            (dialogInterface, i) -> startAboutActivity())
                     .setOnDismissListener(
-                            new AlertDialog.OnDismissListener() {
-
-                                @Override
-                                public void onDismiss(DialogInterface dialogInterface) {
-                                    finish();
-                                }
-                            })
+                            dialogInterface -> finish())
                     .show();
         } else {
             /* Setup baud rate listener */
             final View finalDialogView = dialogView;
-            baudGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-
-                @Override
-                public void onCheckedChanged(RadioGroup group, int checkedId) {
-                    RadioButton rb = finalDialogView.findViewById(baudGroup.getCheckedRadioButtonId());
-                    selectedBaudRate = rb.getText().toString();
-                    Log.d(TAG, "Baud rate selected: " + selectedBaudRate);
-                }
+            baudGroup.setOnCheckedChangeListener((group, checkedId) -> {
+                RadioButton rb = finalDialogView.findViewById(baudGroup.getCheckedRadioButtonId());
+                selectedBaudRate = rb.getText().toString();
+                Log.d(TAG, "Baud rate selected: " + selectedBaudRate);
             });
 
             /* Setup dropdown menu */
@@ -130,55 +128,58 @@ public class MainActivity extends AppCompatActivity {
             final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this)
                     .setView(dialogView)
                     .setCancelable(false)
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            // Do nothing here - override later
-                        }
+                    .setPositiveButton("OK", (dialogInterface, i) -> {
+                        // Do nothing here - override later
+                    })
+                    .setNegativeButton("Close", (dialogInterface, i) -> {
+                        finish();
+                    })
+                    .setNeutralButton(R.string.menu_about, (dialogInterface, i) -> {
+                        startAboutActivity();
                     });
 
             final AlertDialog dialog = dialogBuilder.create();
-            dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-                @Override
-                public void onShow(DialogInterface dialogInterface) {
-                    Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-                    positiveButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            String devName = dropdown.getSelectedItem().toString();
-                            Log.d(TAG, devName + " selected");
+            dialog.setOnShowListener(dialogInterface -> {
+                Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
 
-                            /* Check file permissions */
-                            File f = new File("/dev/" + devName);
-                            if (!f.canWrite() && !f.canRead()) {
-                                Log.e(TAG, "Permissions insufficient on this device");
-                                Snackbar.make(finalDialogView, "Insufficient permissions on " + devName + " device.",
+                positiveButton.setOnClickListener(view -> {
+                    String devName = dropdown.getSelectedItem().toString();
+                    Log.d(TAG, devName + " selected");
+
+                    /* Check file permissions */
+                    File f = new File("/dev/" + devName);
+                    if (!f.canWrite() && !f.canRead()) {
+                        Log.e(TAG, "Permissions insufficient on this device");
+                        Snackbar.make(finalDialogView, "Insufficient permissions on " + devName + " device.",
                                         Snackbar.LENGTH_LONG)
-                                        .show();
-                                return;
-                            }
+                                .show();
+                        return;
+                    }
 
-                            /* Device permissions ok */
-                            SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(
-                                    getApplicationContext(),
-                                    getSupportFragmentManager(),
-                                    devName,
-                                    Integer.valueOf(selectedBaudRate),
-                                    checkBoxRS485.isChecked()
-                            );
-                            ViewPager viewPager = findViewById(R.id.view_pager);
-                            viewPager.setAdapter(sectionsPagerAdapter);
-                            TabLayout tabs = findViewById(R.id.tabs);
-                            tabs.setupWithViewPager(viewPager);
+                    /* Device permissions ok */
+                    SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(
+                            getApplicationContext(),
+                            getSupportFragmentManager(),
+                            devName,
+                            Integer.valueOf(selectedBaudRate),
+                            checkBoxRS485.isChecked()
+                    );
+                    ViewPager viewPager = findViewById(R.id.view_pager);
+                    viewPager.setAdapter(sectionsPagerAdapter);
+                    TabLayout tabs = findViewById(R.id.tabs);
+                    tabs.setupWithViewPager(viewPager);
 
-                            dialog.dismiss();
-                        }
-                    });
-                }
+                    dialog.dismiss();
+                });
             });
             dialog.show();
 
         }
+    }
+
+    private void startAboutActivity() {
+        Intent intent = new Intent(MainActivity.this, AboutActivity.class);
+        startActivity(intent);
     }
 
     @Override
@@ -191,6 +192,9 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_recreate) {
             recreate();
+            return true;
+        } else if (item.getItemId() == R.id.menu_about) {
+            startAboutActivity();
             return true;
         }
         return super.onOptionsItemSelected(item);

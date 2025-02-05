@@ -4,8 +4,8 @@
   -->
 
 <resources>
-    <string name="app_name">TTY Test</string>
-    <string name="app_title">Kynetics Serial Test Application</string>
+    <string name="app_name">Serial Handler</string>
+    <string name="app_title">Kynetics Serial Handler Application</string>
     <string name="tab_text_1">Receiver</string>
     <string name="tab_text_2">Sender</string>
     <string name="data_acquisition">DATA ACQUISITION</string>
@@ -26,4 +26,17 @@
     <string name="mode">MODE</string>
     <string name="rs_485">RS-485</string>
     <string name="menu_restart">restart</string>
+    <string name="menu_about">About</string>
+    <string name="about_text">Serial Android SDK extension example application \n\n
+        This application serves as a reference implementation of Kynetics\' Serial Android SDK Extension library. \n\n
+
+        To learn more about SDK Extension licensing please visit:\n
+        <a href="https://www.kynetics.com/android-sdk-extensions">https://www.kynetics.com/android-sdk-extensions</a>\n\n
+
+        Application source code is available under Apache v2.0 licence at:\n
+        <a href="https://github.com/Kynetics/android-serial-example-app">https://github.com/Kynetics/android-can-example-app</a>\n\n
+
+    </string>
+    <string name="about_copyright">Copyright © 2025  Kynetics, Inc.</string>
+    <string name="about_app_version">App version: %s</string>
 </resources>
