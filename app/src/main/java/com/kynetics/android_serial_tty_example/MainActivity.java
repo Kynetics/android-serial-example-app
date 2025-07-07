@@ -255,7 +255,12 @@ public class MainActivity extends AppCompatActivity {
 
                         /* Display received data */
                         String oldData = binding.textViewSerialMessages.getText().toString();
-                        String newString = new String(newData) + oldData;
+                        String newString;
+                        if (numRead == 1) {
+                            newString = oldData + new String(newData);
+                        } else {
+                            newString = new String(newData) + oldData;
+                        }
                         binding.textViewSerialMessages.setText(newString);
                     }
                 });
@@ -286,7 +291,7 @@ public class MainActivity extends AppCompatActivity {
             File file = files[i];
             String fileName = file.getName();
             /* IMX serial devices are mapped as ttymxc/LP* in Android system */
-            if (fileName.startsWith("ttymxc") || fileName.startsWith("ttyLP")) {
+            if (fileName.startsWith("ttymxc") || fileName.startsWith("ttyLP") || fileName.startsWith("ttyS")) {
                 Log.d(TAG, "Found imx serial dev: " + fileName);
                 devices.add(fileName);
             }

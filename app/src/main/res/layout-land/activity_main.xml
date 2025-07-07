@@ -163,6 +163,7 @@
                     android:layout_marginStart="5dp"
                     android:layout_marginTop="5dp"
                     android:layout_weight="1"
+                    android:minHeight="200dp"
                     app:cardCornerRadius="5dp"
                     app:contentPadding="10dp">
 
